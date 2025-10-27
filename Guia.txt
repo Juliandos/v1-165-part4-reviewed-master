@@ -1,0 +1,105 @@
+¡Hola! Te ayudaré a poner en marcha este proyecto de RAG (Retrieval Augmented Generation) para PDFs. Vamos paso a paso:
+📋 Prerequisitos
+Antes de comenzar, necesitas tener instalado:
+
+Python 3.11.4
+Node.js y npm
+PostgreSQL con la extensión pgvector
+pyenv (para gestión de versiones de Python)
+poetry (para gestión de dependencias de Python)
+
+🚀 Pasos para poner el proyecto en marcha
+1. Configurar la Base de Datos PostgreSQL
+Primero, asegúrate de que PostgreSQL esté corriendo y crea la base de datos:
+bash# Conectar a PostgreSQL
+psql -U postgres
+
+# Crear la base de datos
+CREATE DATABASE database164;
+
+# Conectar a la base de datos
+\c database164
+
+# Habilitar la extensión pgvector
+CREATE EXTENSION vector;
+
+# Salir
+\q
+2. Configurar Variables de Entorno
+Crea un archivo .env en la raíz del proyecto y en v1-165-part4/ con tu información:
+envOPENAI_API_KEY=tu-api-key-aqui
+GROQ_API_KEY=tu-groq-key-aqui
+
+LANGCHAIN_TRACING_V2=true
+LANGCHAIN_ENDPOINT=https://api.smith.langchain.com
+LANGCHAIN_API_KEY=tu-langchain-key
+LANGCHAIN_PROJECT=tu-proyecto
+
+DATABASE_URL=postgresql+psycopg://postgres:tu-password@localhost:5432/database164
+3. Instalar el Backend
+bash# Desde la raíz del proyecto
+pyenv virtualenv 3.11.4 rag-pdf-env
+pyenv activate rag-pdf-env
+pip install -r requirements.txt
+
+# Ir al directorio del backend
+cd v1-165-part4
+poetry install
+4. Crear el directorio para PDFs
+bash# Desde v1-165-part4/
+mkdir -p pdf-documents
+5. Actualizar la ruta en rag_load_and_process.py
+Edita v1-165-part4/rag-data-loader/rag_load_and_process.py y cambia la ruta absoluta a tu ruta:
+pythonloader = DirectoryLoader(
+    os.path.abspath("./pdf-documents"),  # Cambia esto a una ruta relativa
+    glob="**/*.pdf",
+    use_multithreading=True,
+    show_progress=True,
+    max_concurrency=50,
+    loader_cls=UnstructuredPDFLoader,
+)
+6. Instalar el Frontend
+Abre una nueva terminal:
+bash# Desde la raíz del proyecto
+cd v1-165-part4/frontend
+npm ci
+7. Iniciar el Backend
+En la primera terminal:
+bash# Desde v1-165-part4/
+python -m uvicorn app.server:app --reload --host 0.0.0.0 --port 8000
+8. Iniciar el Frontend
+En la segunda terminal:
+bash# Desde v1-165-part4/frontend/
+npm start
+🎯 Uso de la Aplicación
+
+Subir PDFs:
+
+Haz clic en "Choose Files" y selecciona uno o más PDFs
+Haz clic en "Upload PDFs"
+
+
+Procesar PDFs:
+
+Haz clic en "Load and Process PDFs" para indexar los documentos en la base de datos
+
+
+Hacer preguntas:
+
+Escribe tu pregunta en el área de texto
+Presiona Enter o haz clic en "Send"
+La aplicación responderá basándose en el contenido de tus PDFs
+
+
+
+⚠️ Problemas Comunes
+
+Error de conexión a la base de datos: Verifica que PostgreSQL esté corriendo y que la URL de conexión sea correcta
+Error al procesar PDFs: Asegúrate de tener instaladas todas las dependencias de unstructured, especialmente tesseract
+Puerto ocupado: Si el puerto 8000 u 8080 está ocupado, cámbialo en el comando de uvicorn
+
+📝 Notas Importantes
+
+La primera vez que proceses PDFs puede tardar, especialmente si son documentos grandes
+Asegúrate de tener créditos en tu cuenta de OpenAI para usar la API
+Los PDFs se guardan en v1-165-part4/pdf-documents/
